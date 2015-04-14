@@ -3,6 +3,8 @@ package de.mt.poltool;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.joda.time.DateTime;
+
 import de.mt.poltool.model.Match;
 import de.mt.poltool.visualisation.TeamGraph;
 
@@ -29,14 +31,15 @@ public class Main {
 			"http://kickern-hamburg.de/liga-tool/mannschaften?task=team_details&veranstaltungid=64&id=800" };
 
 	public static void main(String[] args) throws Exception {
+		System.out.println(new DateTime());
 		LigaImporter li = new LigaImporter();
 		Collection<Match> matches = new ArrayList<Match>();
-		// matches.addAll(li
-		// .fetchMatchesFromTeamOverviewSite("http://kickern-hamburg.de/liga-tool/mannschaften"));
-		matches.addAll(li.fetchMatchesFromTeamSite(kickeronis[0]));
+		 matches.addAll(li
+		 .fetchMatchesFromTeamOverviewSite("http://kickern-hamburg.de/liga-tool/mannschaften"));
+//		matches.addAll(li.fetchMatchesFromTeamSite(kickeronis[1]));
 		// matches.add(li.fetchMatchFromMatchSite(matchSites[1]));
-
-		// new CSVExporter().export("c:\\tmp\\liga2015.csv", matches);
-		new TeamGraph().showWinsPerSetNr(matches);
+		 System.out.println(new DateTime());
+		new CSVExporter().export("c:\\tmp\\liga2015v2.csv", matches);
+//		new TeamGraph().showWinsPerSetNr(matches);
 	}
 }

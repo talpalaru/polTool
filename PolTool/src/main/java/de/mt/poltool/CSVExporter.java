@@ -53,5 +53,6 @@ public class CSVExporter {
 				csvWriter = null;
 			}
 		}
+		System.out.println("Wrote: " + fileName);
 	}
 }
