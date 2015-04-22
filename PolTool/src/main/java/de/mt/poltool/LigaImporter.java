@@ -1,16 +1,15 @@
 package de.mt.poltool;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -61,8 +60,9 @@ public class LigaImporter {
 			if (link.attr("href").contains(
 					"/liga-tool/mannschaften?task=begegnung_spielplan")) {
 				Match match = fetchMatchFromMatchSite(link.attr("abs:href"));
-				match.setDate(DateTime.parse(link.text().split(",")[1].trim(),
-						DateTimeFormat.forPattern("dd.MM.yyyy HH:mm")));
+				match.setDate(LocalDateTime.parse(
+						link.text().split(",")[1].trim(),
+						DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")));
 				matches.add(match);
 			}
 		}
@@ -135,7 +135,7 @@ public class LigaImporter {
 			if (rightTeam.size() > 0) {
 				set.setRightPlayer1(rightTeam.get(0).text());
 			}
-			
+
 			// if double set second players
 			if (!set.isSingle()) {
 				if (leftTeam.size() > 1) {

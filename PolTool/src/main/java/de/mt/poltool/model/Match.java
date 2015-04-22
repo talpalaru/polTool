@@ -1,9 +1,8 @@
 package de.mt.poltool.model;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.TreeSet;
-
-import org.joda.time.DateTime;
 
 import com.google.common.collect.ComparisonChain;
 
@@ -11,7 +10,7 @@ public class Match implements Comparable<Match> {
 
 	private String leftTeam;
 	private String rightTeam;
-	private DateTime date;
+	private LocalDateTime date;
 
 	private Collection<PlaySet> sets = new TreeSet<PlaySet>();
 
@@ -43,11 +42,11 @@ public class Match implements Comparable<Match> {
 		this.rightTeam = rightTeam;
 	}
 
-	public DateTime getDate() {
+	public LocalDateTime getDate() {
 		return date;
 	}
 
-	public void setDate(DateTime date) {
+	public void setDate(LocalDateTime date) {
 		this.date = date;
 	}
 

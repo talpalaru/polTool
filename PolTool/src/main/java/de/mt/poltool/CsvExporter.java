@@ -3,15 +3,14 @@ package de.mt.poltool;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
-
-import org.joda.time.format.DateTimeFormat;
 
 import au.com.bytecode.opencsv.CSVWriter;
 import de.mt.poltool.model.Match;
 import de.mt.poltool.model.PlaySet;
 
-public class CSVExporter {
+public class CsvExporter {
 
 	public void export(String fileName, Collection<Match> matches)
 			throws IOException {
@@ -26,15 +25,15 @@ public class CSVExporter {
 			for (Match match : matches) {
 				String homeTeam = match.getLeftTeam();
 				String guestTeam = match.getRightTeam();
-				String date = match.getDate().toString(
-						DateTimeFormat.forPattern("dd.MM.yyyy HH:mm"));
+				String date = match.getDate().format(
+						DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"));
 
 				for (PlaySet set : match.getSets()) {
 					String setNr = Integer.toString(set.getSetNr());
 					String homeP1 = set.getLeftPlayer1();
 					String homeP2 = set.getLeftPlayer2();
 					String guestP1 = set.getRightPlayer1();
-					String guestP2 = set.getRightPlayer1();
+					String guestP2 = set.getRightPlayer2();
 					String homeResult = Integer.toString(set.getLeftResult());
 					String guestResult = Integer.toString(set.getRightResult());
 
