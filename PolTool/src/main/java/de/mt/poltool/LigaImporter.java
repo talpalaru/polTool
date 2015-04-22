@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.joda.time.DateTime;
@@ -23,10 +24,10 @@ public class LigaImporter {
 
 	public Collection<Match> fetchMatchesFromTeamOverviewSite(String sourceUrl)
 			throws Exception {
-		Collection<Match> matches = new ArrayList<Match>();
+		Collection<Match> matches = new TreeSet<Match>();
 		Document site = getDocument(sourceUrl);
 		Elements links = site.select("body a");
-		Map<String, String> teams = new HashMap<String, String>();
+		Map<String, String> teams = new TreeMap<String, String>();
 		for (Element link : links) {
 			if (link.attr("href").contains(
 					"/liga-tool/mannschaften?task=team_details")) {
@@ -34,9 +35,11 @@ public class LigaImporter {
 			}
 		}
 		System.out.println("Found " + teams.size() + " teams.\n");
+		int i = 0;
 		for (Entry<String, String> team : teams.entrySet()) {
-			System.out.println("Adding: " + team.getKey());
+			System.out.println(i + " Adding: " + team.getKey());
 			matches.addAll(fetchMatchesFromTeamSite(team.getValue()));
+			i++;
 		}
 
 		return matches;
@@ -78,8 +81,8 @@ public class LigaImporter {
 		Match match = new Match();
 
 		Document doc = getDocument(sourceUrl);
-		fetchTeamNames(match, doc);
 		match.addSets(parseRows(doc));
+		fetchTeamNames(match, doc);
 		return match;
 
 	}
@@ -122,22 +125,23 @@ public class LigaImporter {
 				System.err.println("Unkown table row format in row: "
 						+ row.html());
 			}
-
+			// check if single or double game
 			set.setSingle(leftTeam.size() < 2 && rightTeam.size() < 2);
-			if (set.isSingle()) {
+
+			// first players
+			if (leftTeam.size() > 0) {
 				set.setLeftPlayer1(leftTeam.get(0).text());
+			}
+			if (rightTeam.size() > 0) {
 				set.setRightPlayer1(rightTeam.get(0).text());
-			} else {
-				if (leftTeam.size() > 0) {
-					set.setLeftPlayer1(leftTeam.get(0).text());
-				}
+			}
+			
+			// if double set second players
+			if (!set.isSingle()) {
 				if (leftTeam.size() > 1) {
 					set.setLeftPlayer2(leftTeam.get(1).text());
 				}
-				if (leftTeam.size() > 0) {
-					set.setRightPlayer1(rightTeam.get(0).text());
-				}
-				if (leftTeam.size() > 1) {
+				if (rightTeam.size() > 1) {
 					set.setRightPlayer2(rightTeam.get(1).text());
 				}
 			}
