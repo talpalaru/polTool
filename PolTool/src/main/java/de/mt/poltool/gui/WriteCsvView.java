@@ -9,7 +9,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 import de.mt.poltool.CsvHandler;
-import de.mt.poltool.gui.model.GuiModel;
+import de.mt.poltool.model.GuiModel;
 
 public class WriteCsvView extends AbstractView {
 	private File file;

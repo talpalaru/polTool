@@ -7,7 +7,7 @@ import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
-import de.mt.poltool.gui.model.GuiModel;
+import de.mt.poltool.model.GuiModel;
 
 public class AbstractView extends Group {
 

@@ -13,7 +13,7 @@ import java.util.TreeSet;
 
 import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
-import de.mt.poltool.gui.model.MatchSet;
+import de.mt.poltool.model.MatchSet;
 
 public class CsvHandler {
 	private static final DateTimeFormatter DATE_PATTERN = DateTimeFormatter

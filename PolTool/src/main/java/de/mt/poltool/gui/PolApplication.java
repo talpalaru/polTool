@@ -14,7 +14,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import de.mt.poltool.gui.model.GuiModel;
+import de.mt.poltool.model.GuiModel;
 
 /**
  * @author talpalaru

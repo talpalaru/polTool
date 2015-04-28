@@ -13,7 +13,7 @@ import javafx.scene.chart.XYChart.Series;
 
 import com.google.common.base.Strings;
 
-import de.mt.poltool.gui.model.MatchSet;
+import de.mt.poltool.model.MatchSet;
 
 public class TeampPlayerGraphModel extends GraphModel {
 

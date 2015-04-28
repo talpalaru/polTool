@@ -11,8 +11,8 @@ import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 import de.mt.poltool.CsvHandler;
-import de.mt.poltool.gui.model.GuiModel;
-import de.mt.poltool.gui.model.MatchSet;
+import de.mt.poltool.model.GuiModel;
+import de.mt.poltool.model.MatchSet;
 
 public class ReadCsvView extends AbstractView {
 	private File file;

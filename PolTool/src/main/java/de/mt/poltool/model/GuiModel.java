@@ -1,4 +1,4 @@
-package de.mt.poltool.gui.model;
+package de.mt.poltool.model;
 
 import java.util.Collection;
 import java.util.HashMap;

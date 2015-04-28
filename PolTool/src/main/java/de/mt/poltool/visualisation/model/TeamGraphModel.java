@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import javafx.scene.chart.XYChart;
-import de.mt.poltool.gui.model.MatchSet;
+import de.mt.poltool.model.MatchSet;
 
 public class TeamGraphModel extends GraphModel {
 

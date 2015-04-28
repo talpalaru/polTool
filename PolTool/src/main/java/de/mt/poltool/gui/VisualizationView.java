@@ -29,8 +29,8 @@ import javafx.stage.Stage;
 import com.google.common.base.Strings;
 
 import de.mt.poltool.CsvHandler;
-import de.mt.poltool.gui.model.GuiModel;
-import de.mt.poltool.gui.model.MatchSet;
+import de.mt.poltool.model.GuiModel;
+import de.mt.poltool.model.MatchSet;
 import de.mt.poltool.visualisation.GraphView;
 import de.mt.poltool.visualisation.model.PlayerGraphModel;
 import de.mt.poltool.visualisation.model.PlayerPosGraphModel;

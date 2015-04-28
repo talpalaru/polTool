@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import de.mt.poltool.gui.model.MatchSet;
+import de.mt.poltool.model.MatchSet;
 
 public class PlayerPosGraphModel extends GraphModel {
 	public PlayerPosGraphModel(Collection<MatchSet> matches, String playerName,

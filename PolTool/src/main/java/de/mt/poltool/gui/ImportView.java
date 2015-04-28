@@ -8,7 +8,7 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import de.mt.poltool.LigaImporter;
-import de.mt.poltool.gui.model.GuiModel;
+import de.mt.poltool.model.GuiModel;
 
 public class ImportView extends AbstractView {
 

@@ -16,7 +16,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import de.mt.poltool.gui.model.MatchSet;
+import de.mt.poltool.model.MatchSet;
 
 public class LigaImporter {
 
