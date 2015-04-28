@@ -69,8 +69,8 @@ public class PlayerGraphModel extends GraphModel {
 		for (int i = 0; i < 16; i++) {
 			categories.add(Integer.toString(i + 1) + ". ("
 					+ formatPercentage(wins.get(i)) + ", "
-					+ formatPercentage(draws.get(i)) + ") "
-					+ format(appereances.get(i)) + "\nSätze");
+					+ formatPercentage(draws.get(i)) + ") von "
+					+ format(appereances.get(i)) + "Sätzen");
 		}
 		setCategories(categories);
 

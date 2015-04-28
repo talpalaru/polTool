@@ -4,16 +4,16 @@
 package de.mt.poltool.gui;
 
 import javafx.application.Application;
-import javafx.scene.Group;
+import javafx.beans.property.ReadOnlyDoubleProperty;
+import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.scene.Scene;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
-import javafx.scene.text.Text;
 import javafx.stage.Stage;
+
+import org.controlsfx.control.StatusBar;
+
 import de.mt.poltool.model.GuiModel;
 
 /**
@@ -23,20 +23,18 @@ import de.mt.poltool.model.GuiModel;
 public class PolApplication extends Application {
 
 	private GuiModel model;
-	private static Text statusBar = new Text("Gestartet");
+	private static StatusBar statusBar = new StatusBar();
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		model = new GuiModel();
-		Group root = new Group();
-		TabPane mainTabPane = new TabPane();
-		Scene scene = new Scene(root, 620, 400);
-		primaryStage.setTitle("Pol Tool");
-		primaryStage.setScene(scene);
 		BorderPane rootPane = new BorderPane();
+		TabPane mainTabPane = new TabPane();
+		Scene scene = new Scene(rootPane, 620, 400);
+		primaryStage.setScene(scene);
+		primaryStage.setTitle("Pol Tool");
 		rootPane.prefHeightProperty().bind(scene.heightProperty());
 		rootPane.prefWidthProperty().bind(scene.widthProperty());
-		root.getChildren().add(rootPane);
 
 		Tab importTab = new Tab();
 		importTab.setText("Import Web");
@@ -55,21 +53,31 @@ public class PolApplication extends Application {
 
 		mainTabPane.getTabs().addAll(importTab, readTab, visTab);
 
-		statusBar.setFont(Font.font(Font.getDefault().getFamily(),
-				FontWeight.EXTRA_BOLD, Font.getDefault().getSize()));
-		statusBar.setFill(Color.BROWN);
-		statusBar.setStyle("fx-background-color: #1d1d1d");
-
 		rootPane.setCenter(mainTabPane);
-		rootPane.setTop(statusBar);
+		rootPane.setBottom(statusBar);
 		primaryStage.show();
 	}
 
 	public static void main(String[] args) {
+		Thread.setDefaultUncaughtExceptionHandler((thread, exception) -> {
+			handleException(exception);
+		});
 		launch(args);
 	}
 
+	private static void handleException(Throwable exception) {
+		setStatus(exception.getMessage());
+	}
+
 	public static void setStatus(String status) {
-		statusBar.setText(status);
+		// statusBar.setText(status);
+	}
+
+	public static void bindProgressBar(ReadOnlyDoubleProperty progressProperty) {
+		statusBar.progressProperty().bind(progressProperty);
+	}
+
+	public static void bindStatusText(ReadOnlyStringProperty statusProperty) {
+		statusBar.textProperty().bind(statusProperty);
 	}
 }

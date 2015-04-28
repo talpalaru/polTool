@@ -93,7 +93,7 @@ public abstract class GraphModel {
 		for (Entry<Integer, Double> setEntry : values.entrySet()) {
 			Double value = setEntry.getValue();
 			if (value < 0.1d) {
-				value = 0.1d;
+				value = 0d;
 			}
 			final XYChart.Data<String, Number> data = new XYChart.Data<String, Number>(
 					categories.get(i), value);

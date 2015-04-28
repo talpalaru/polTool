@@ -25,8 +25,8 @@ public class TeampPlayerGraphModel extends GraphModel {
 	public TeampPlayerGraphModel(Collection<MatchSet> matches, String team,
 			LocalDate from, LocalDate to, boolean weighted) {
 
-		stageTitle = "Spieler der Mannschaft " + team + " von " + formatDate(from)
-				+ " bis " + formatDate(to);
+		stageTitle = "Spieler der Mannschaft " + team + " von "
+				+ formatDate(from) + " bis " + formatDate(to);
 		barTitle = "Gewinnquote in Prozent (von " + matches.size() + " Sätzen)";
 
 		for (MatchSet set : matches) {
@@ -86,14 +86,9 @@ public class TeampPlayerGraphModel extends GraphModel {
 	}
 
 	private String createCategoryName(String name) {
-		return name
-				+ "\n("
-				+ formatPercentage(playerWins.get(name)
-						/ playerAppearance.get(name) * 100d)
-				+ ", "
-				+ formatPercentage(playerDraws.get(name).intValue()
-						/ playerAppearance.get(name) * 100d) + ")"
-				+ "\n in " + format(playerAppearance.get(name)) + " Sätzen";
+		return name + "\n(" + format(playerWins.get(name)) + ", "
+				+ format(playerDraws.get(name)) + ")" + " von "
+				+ format(playerAppearance.get(name)) + " Sätzen";
 	}
 
 	private void increasePlayerPercentage(String player, boolean isWin) {

@@ -1,5 +1,8 @@
 package de.mt.poltool.gui;
 
+import java.util.Collection;
+import java.util.concurrent.Executors;
+
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.RadioButton;
@@ -7,8 +10,10 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
-import de.mt.poltool.LigaImporter;
+import de.mt.poltool.LigaImporterTask;
+import de.mt.poltool.LigaImporterTask.Type;
 import de.mt.poltool.model.GuiModel;
+import de.mt.poltool.model.MatchSet;
 
 public class ImportView extends AbstractView {
 
@@ -38,24 +43,28 @@ public class ImportView extends AbstractView {
 		matchRadio.setToggleGroup(group);
 
 		Button startButton = new Button("Start");
-		startButton
-				.setOnAction(event -> {
-					LigaImporter li = new LigaImporter();
-					if (appendCheckbox.isSelected())
-						model.clear();
-
-					if (overviewRadio.isSelected()) {
-						model.addMatchSets(li
-								.fetchMatchesFromTeamOverviewSite(urlName
-										.getText()));
-					} else if (teamRadio.isSelected()) {
-						model.addMatchSets(li.fetchMatchesFromTeamSite(urlName
-								.getText()));
-					} else if (matchRadio.isSelected()) {
-						model.addMatchSets(li.fetchMatchFromMatchSite(urlName
-								.getText()));
-					}
-				});
+		startButton.setOnAction(event -> {
+			if (appendCheckbox.isSelected())
+				model.clear();
+			Type type = null;
+			if (overviewRadio.isSelected()) {
+				type = Type.OVERVIEW;
+			} else if (teamRadio.isSelected()) {
+				type = Type.TEAM;
+			} else if (matchRadio.isSelected()) {
+				type = Type.MATCH;
+			}
+			LigaImporterTask task = new LigaImporterTask();
+			task.setUrl(urlName.getText());
+			task.setType(type);
+			PolApplication.bindProgressBar(task.progressProperty());
+			PolApplication.bindStatusText(task.messageProperty());
+			task.setOnSucceeded((value) -> {
+				model.addMatchSets((Collection<MatchSet>) value.getSource()
+						.getValue());
+			});
+			Executors.newSingleThreadExecutor().execute(task);
+		});
 
 		rootPane.addRow(1, urlName);
 		rootPane.addRow(2, overviewRadio);

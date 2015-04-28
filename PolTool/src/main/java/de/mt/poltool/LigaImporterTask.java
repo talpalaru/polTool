@@ -10,15 +10,22 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import javafx.concurrent.Task;
+
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import com.google.common.base.Strings;
+
 import de.mt.poltool.model.MatchSet;
 
-public class LigaImporter {
+public class LigaImporterTask extends Task<Collection<MatchSet>> {
+
+	private String url;
+	private Type type;
 
 	public Collection<MatchSet> fetchMatchesFromTeamOverviewSite(
 			String sourceUrl) {
@@ -34,18 +41,22 @@ public class LigaImporter {
 					teams.put(link.text(), link.attr("abs:href"));
 				}
 			}
-			System.out.println("Found " + teams.size() + " teams.\n");
+			int teamCount = teams.size();
+			updateMessage(teamCount + " Teams gefunden.");
+			System.out.println(teamCount + " Teams gefunden.");
 			int i = 0;
 			for (Entry<String, String> team : teams.entrySet()) {
-				System.out.println(i + " Adding: " + team.getKey());
+				updateMessage(i + " von " + teamCount + ": " + team.getKey()
+						+ " eingelesen.");
+				updateProgress(i, teamCount);
+				System.out.println(i + " von " + teamCount + ": "
+						+ team.getKey() + " eingelesen.");
 				matches.addAll(fetchMatchesFromTeamSite(team.getValue()));
 				i++;
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return matches;
@@ -67,24 +78,15 @@ public class LigaImporter {
 			for (Element link : links) {
 				if (link.attr("href").contains(
 						"/liga-tool/mannschaften?task=begegnung_spielplan")) {
-					LocalDateTime date = (LocalDateTime.parse(link.text()
-							.split(",")[1].trim(), DateTimeFormatter
-							.ofPattern("dd.MM.yyyy HH:mm")));
 
 					matches.addAll(fetchMatchFromMatchSite(link
 							.attr("abs:href")));
-					for (MatchSet matchSet : matches) {
-						matchSet.setDate(date);
-					}
 				}
 			}
 
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 		return matches;
 	}
@@ -115,14 +117,25 @@ public class LigaImporter {
 					guestTeam = teams[1].trim();
 				}
 			}
+			Elements dateElements = doc
+					.getElementsMatchingOwnText(".(Spieltag|Runde).*");
+			LocalDateTime date = null;
+			if (!dateElements.isEmpty()) {
+				String dateText = dateElements.get(0).text();
+				if (!Strings.isNullOrEmpty(dateText)) {
+					date = LocalDateTime.parse(dateText.split(",")[1].trim(),
+							DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"));
+				}
+			}
 			matches.addAll(parseRows(doc));
 			for (MatchSet matchSet : matches) {
 				matchSet.setHomeTeam(homeTeam);
 				matchSet.setGuestTeam(guestTeam);
+				matchSet.setDate(date);
 			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
+		} catch (Exception e) {
 			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 		return matches;
 
@@ -182,7 +195,7 @@ public class LigaImporter {
 			if (rightTeam.size() > 1) {
 				set.setGuestPlayer2(rightTeam.get(1).text());
 			}
-		
+
 			sets.add(set);
 		}
 		return sets;
@@ -204,6 +217,39 @@ public class LigaImporter {
 		connect.timeout(0);
 		Document doc = connect.get();
 		return doc;
+	}
+
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
+	}
+
+	public Type getType() {
+		return type;
+	}
+
+	public void setType(Type type) {
+		this.type = type;
+	}
+
+	@Override
+	protected Collection<MatchSet> call() throws Exception {
+		switch (type) {
+		case OVERVIEW:
+			return fetchMatchesFromTeamOverviewSite(url);
+		case TEAM:
+			return fetchMatchesFromTeamSite(url);
+		case MATCH:
+			return fetchMatchFromMatchSite(url);
+		}
+		return new ArrayList<MatchSet>();
+	}
+
+	public enum Type {
+		OVERVIEW, TEAM, MATCH
 	}
 
 }
