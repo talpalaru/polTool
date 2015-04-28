@@ -175,17 +175,14 @@ public class LigaImporter {
 				set.setGuestPlayer1(rightTeam.get(0).text());
 			}
 
-			boolean isSingle = cells.size() == 4;
 			// if double set second players
-			if (isSingle) {
-				if (leftTeam.size() > 1) {
-					set.setHomePlayer2(leftTeam.get(1).text());
-				}
-				if (rightTeam.size() > 1) {
-					set.setGuestPlayer2(rightTeam.get(1).text());
-				}
+			if (leftTeam.size() > 1) {
+				set.setHomePlayer2(leftTeam.get(1).text());
 			}
-
+			if (rightTeam.size() > 1) {
+				set.setGuestPlayer2(rightTeam.get(1).text());
+			}
+		
 			sets.add(set);
 		}
 		return sets;
