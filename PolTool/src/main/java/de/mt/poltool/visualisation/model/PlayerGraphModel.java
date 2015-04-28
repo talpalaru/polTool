@@ -70,7 +70,7 @@ public class PlayerGraphModel extends GraphModel {
 			categories.add(Integer.toString(i + 1) + ". ("
 					+ formatPercentage(wins.get(i)) + ", "
 					+ formatPercentage(draws.get(i)) + ") "
-					+ format(appereances.get(i)) + " Sätze");
+					+ format(appereances.get(i)) + "\nSätze");
 		}
 		setCategories(categories);
 
