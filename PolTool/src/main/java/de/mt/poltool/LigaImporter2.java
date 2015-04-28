@@ -16,13 +16,13 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import de.mt.poltool.gui.model.MatchSet;
+import de.mt.poltool.model.Match;
+import de.mt.poltool.model.PlaySet;
 
-public class LigaImporter {
+public class LigaImporter2 {
 
-	public Collection<MatchSet> fetchMatchesFromTeamOverviewSite(
-			String sourceUrl) {
-		Collection<MatchSet> matches = new TreeSet<MatchSet>();
+	public Collection<Match> fetchMatchesFromTeamOverviewSite(String sourceUrl) {
+		Collection<Match> matches = new TreeSet<Match>();
 		Document site;
 		try {
 			site = getDocument(sourceUrl);
@@ -58,8 +58,8 @@ public class LigaImporter {
 	 * @return
 	 * @throws Exception
 	 */
-	public Collection<MatchSet> fetchMatchesFromTeamSite(String sourceUrl) {
-		Collection<MatchSet> matches = new ArrayList<MatchSet>();
+	public Collection<Match> fetchMatchesFromTeamSite(String sourceUrl) {
+		Collection<Match> matches = new ArrayList<Match>();
 		Document teamSite;
 		try {
 			teamSite = getDocument(sourceUrl);
@@ -67,15 +67,11 @@ public class LigaImporter {
 			for (Element link : links) {
 				if (link.attr("href").contains(
 						"/liga-tool/mannschaften?task=begegnung_spielplan")) {
-					LocalDateTime date = (LocalDateTime.parse(link.text()
-							.split(",")[1].trim(), DateTimeFormatter
-							.ofPattern("dd.MM.yyyy HH:mm")));
-
-					matches.addAll(fetchMatchFromMatchSite(link
-							.attr("abs:href")));
-					for (MatchSet matchSet : matches) {
-						matchSet.setDate(date);
-					}
+					Match match = fetchMatchFromMatchSite(link.attr("abs:href"));
+					match.setDate(LocalDateTime.parse(
+							link.text().split(",")[1].trim(),
+							DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")));
+					matches.add(match);
 				}
 			}
 
@@ -96,35 +92,19 @@ public class LigaImporter {
 	 * @return
 	 * @throws Exception
 	 */
-	public Collection<MatchSet> fetchMatchFromMatchSite(String sourceUrl) {
-		Collection<MatchSet> matches = new ArrayList<MatchSet>();
+	public Match fetchMatchFromMatchSite(String sourceUrl) {
+		Match match = new Match();
 
 		Document doc;
 		try {
 			doc = getDocument(sourceUrl);
-
-			Elements tableHeader = doc.select("body .sectiontableheader");
-			String homeTeam = "";
-			String guestTeam = "";
-			for (Element e : tableHeader) {
-				String text = e.text();
-				if (text.contains("vs.")) {
-					String[] sections = text.split(">");
-					String[] teams = sections[sections.length - 1].split("vs.");
-					homeTeam = teams[0].trim();
-					guestTeam = teams[1].trim();
-				}
-			}
-			matches.addAll(parseRows(doc));
-			for (MatchSet matchSet : matches) {
-				matchSet.setHomeTeam(homeTeam);
-				matchSet.setGuestTeam(guestTeam);
-			}
+			match.addSets(parseRows(doc));
+			fetchTeamNames(match, doc);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return matches;
+		return match;
 
 	}
 
@@ -135,12 +115,12 @@ public class LigaImporter {
 	 * @param rowElements
 	 * @return
 	 */
-	private Collection<MatchSet> parseRows(Document doc) {
+	private Collection<PlaySet> parseRows(Document doc) {
 		Elements rowElements = doc.select("body .sectiontableentry1");
 		rowElements.addAll(doc.select("body .sectiontableentry2"));
-		Collection<MatchSet> sets = new ArrayList<MatchSet>();
+		Collection<PlaySet> sets = new TreeSet<PlaySet>();
 		for (Element row : rowElements) {
-			MatchSet set = new MatchSet();
+			PlaySet set = new PlaySet();
 
 			Elements cells = row.select(" > td");
 			// set Number
@@ -149,8 +129,8 @@ public class LigaImporter {
 			// result
 			String resultText = fetchResultText(row);
 			String[] results = resultText.trim().split(":");
-			set.setHomeResult(Integer.parseInt(results[0]));
-			set.setGuestResult(Integer.parseInt(results[1]));
+			set.setLeftResult(Integer.parseInt(results[0]));
+			set.setRightResult(Integer.parseInt(results[1]));
 
 			// player names and single or double game
 			Elements leftTeam = null;
@@ -166,25 +146,49 @@ public class LigaImporter {
 				System.err.println("Unkown table row format in row: "
 						+ row.html());
 			}
+			// check if single or double game
+			set.setSingle(leftTeam.size() < 2 && rightTeam.size() < 2);
 
 			// first players
 			if (leftTeam.size() > 0) {
-				set.setHomePlayer1(leftTeam.get(0).text());
+				set.setLeftPlayer1(leftTeam.get(0).text());
 			}
 			if (rightTeam.size() > 0) {
-				set.setGuestPlayer1(rightTeam.get(0).text());
+				set.setRightPlayer1(rightTeam.get(0).text());
 			}
 
-			boolean isSingle = cells.size() == 4;
 			// if double set second players
-			if (isSingle) {
+			if (!set.isSingle()) {
 				if (leftTeam.size() > 1) {
-					set.setHomePlayer2(leftTeam.get(1).text());
+					set.setLeftPlayer2(leftTeam.get(1).text());
 				}
 				if (rightTeam.size() > 1) {
-					set.setGuestPlayer2(rightTeam.get(1).text());
+					set.setRightPlayer2(rightTeam.get(1).text());
 				}
 			}
+
+			//
+			// // player names and single or double game
+			// Elements players = fetchPlayers(row);
+			// switch (players.size()) {
+			// case 2:
+			// set.setSingle(true);
+			// set.setLeftPlayer1(players.get(0).text());
+			// set.setRightPlayer1(players.get(1).text());
+			// break;
+			// case 4:
+			// set.setSingle(false);
+			// set.setLeftPlayer1(players.get(0).text());
+			// set.setLeftPlayer2(players.get(1).text());
+			// set.setRightPlayer1(players.get(2).text());
+			// set.setRightPlayer2(players.get(3).text());
+			// break;
+			//
+			// default:
+			// System.err.println("Number of Players in a set is"
+			// + players.size() + "?? in row: " + row.html());
+			// continue;
+			// }
 
 			sets.add(set);
 		}
@@ -202,6 +206,10 @@ public class LigaImporter {
 		return resultElement.get(0).text();
 	}
 
+	private Elements fetchPlayers(Element row) {
+		return row.getElementsByTag("a");
+	}
+
 	private Document getDocument(String sourceUrl) throws IOException {
 		Connection connect = Jsoup.connect(sourceUrl);
 		connect.timeout(0);
@@ -209,4 +217,16 @@ public class LigaImporter {
 		return doc;
 	}
 
+	private void fetchTeamNames(Match playList, Document document) {
+		Elements tableHeader = document.select("body .sectiontableheader");
+		for (Element e : tableHeader) {
+			String text = e.text();
+			if (text.contains("vs.")) {
+				String[] sections = text.split(">");
+				String[] teams = sections[sections.length - 1].split("vs.");
+				playList.setLeftTeam(teams[0].trim());
+				playList.setRightTeam(teams[1].trim());
+			}
+		}
+	}
 }

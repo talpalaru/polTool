@@ -30,7 +30,8 @@ public class PolApplication extends Application {
 		model = new GuiModel();
 		Group root = new Group();
 		TabPane mainTabPane = new TabPane();
-		Scene scene = new Scene(root, 400, 200);
+		Scene scene = new Scene(root, 620, 400);
+		primaryStage.setTitle("Pol Tool");
 		primaryStage.setScene(scene);
 		BorderPane rootPane = new BorderPane();
 		rootPane.prefHeightProperty().bind(scene.heightProperty());
@@ -42,10 +43,6 @@ public class PolApplication extends Application {
 		importTab.setClosable(false);
 		importTab.setContent(new ImportView(model, primaryStage));
 
-		Tab writeTab = new Tab();
-		writeTab.setClosable(false);
-		writeTab.setText("Write CSV");
-
 		Tab readTab = new Tab();
 		readTab.setText("Read CSV");
 		readTab.setClosable(false);
@@ -56,7 +53,7 @@ public class PolApplication extends Application {
 		visTab.setClosable(false);
 		visTab.setContent(new VisualizationView(model, primaryStage));
 
-		mainTabPane.getTabs().addAll(importTab, readTab, writeTab, visTab);
+		mainTabPane.getTabs().addAll(importTab, readTab, visTab);
 
 		statusBar.setFont(Font.font(Font.getDefault().getFamily(),
 				FontWeight.EXTRA_BOLD, Font.getDefault().getSize()));

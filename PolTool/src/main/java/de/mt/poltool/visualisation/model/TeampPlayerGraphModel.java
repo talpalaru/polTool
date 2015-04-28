@@ -8,9 +8,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
-import javafx.collections.FXCollections;
-import javafx.scene.chart.CategoryAxis;
-import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.chart.XYChart.Series;
 
@@ -66,21 +63,12 @@ public class TeampPlayerGraphModel extends GraphModel {
 			}
 		}
 
-		xAxis = new CategoryAxis();
 		List<String> categories = new ArrayList<String>();
 		for (String name : playerAppearance.keySet()) {
 			categories.add(createCategoryName(name));
 		}
-		xAxis.setCategories(FXCollections
-				.<String> observableArrayList(categories));
-
-		yAxis = new NumberAxis();
-		yAxis.setUpperBound(100);
-		yAxis.setLowerBound(0);
-		yAxis.setAutoRanging(false);
+		setCategories(categories);
 		xAxis.setLabel("Spieler");
-		yAxis.setLabel("Prozent");
-		xAxis.setTickLabelRotation(70d);
 
 		if (weighted) {
 			Series<String, Number> seriesM = createSeries("Gewichtet",

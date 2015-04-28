@@ -1,10 +1,8 @@
 package de.mt.poltool.gui;
 
 import java.io.File;
-import java.util.Collection;
 
 import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextField;
 import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
@@ -12,17 +10,14 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 import de.mt.poltool.CsvHandler;
 import de.mt.poltool.gui.model.GuiModel;
-import de.mt.poltool.gui.model.MatchSet;
 
-public class ReadCsvView extends AbstractView {
+public class WriteCsvView extends AbstractView {
 	private File file;
 	private TextField fileName;
-	private CheckBox appendCheckbox;
+	private Button writeButton;
 
-	public ReadCsvView(GuiModel model, Stage primaryStage) {
+	public WriteCsvView(GuiModel model, Stage primaryStage) {
 		super(model, primaryStage);
-
-		appendCheckbox = new CheckBox("Vorhandene Daten löschen");
 
 		fileName = new TextField();
 		fileName.setEditable(false);
@@ -33,12 +28,12 @@ public class ReadCsvView extends AbstractView {
 		Button fileButton = new Button("Wähle");
 		fileButton.setOnAction(event -> handleFileChooser());
 
-		Button readButton = new Button("Einlesen");
-		readButton.setOnAction(event -> handleRead());
+		writeButton = new Button("Schreiben");
+		writeButton.setOnAction(event -> handleWrite());
+		writeButton.setDisable(true);
 
 		rootPane.addRow(1, fileButton, fileName);
-		rootPane.addRow(2, appendCheckbox);
-		rootPane.addRow(3, readButton);
+		rootPane.addRow(2, writeButton);
 
 		this.getChildren().add(rootPane);
 	}
@@ -49,23 +44,21 @@ public class ReadCsvView extends AbstractView {
 		fileChooser.getExtensionFilters().addAll(
 				new ExtensionFilter("CSV", "*.csv"),
 				new ExtensionFilter("All Files", "*.*"));
-		File selectedFile = fileChooser.showOpenDialog(primaryStage);
+		File selectedFile = fileChooser.showSaveDialog(primaryStage);
 		if (selectedFile != null) {
 			String name = selectedFile.toString();
 			fileName.setText(name);
 			file = selectedFile;
 			setStatus("Datei ausgewählt.");
 		}
+		writeButton.setDisable(selectedFile == null);
+
 	}
 
-	protected void handleRead() {
+	protected void handleWrite() {
 		CsvHandler handler = new CsvHandler();
-		Collection<MatchSet> matches = handler.read(file);
-		if (appendCheckbox.isSelected()) {
-			model.clear();
-		}
-		model.addMatchSets(matches);
-		setStatus("Datei eingelesen.");
+		handler.write(file, model.getSets());
+		setStatus("Datei geschrieben.");
 	}
 
 	private void setStatus(String status) {

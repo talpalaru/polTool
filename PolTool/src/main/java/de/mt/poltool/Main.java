@@ -33,7 +33,7 @@ public class Main {
 	public static void main(String[] args) throws Exception {
 		System.out.println(LocalDateTime.now().format(
 				DateTimeFormatter.ISO_DATE_TIME));
-		LigaImporter li = new LigaImporter();
+		LigaImporter2 li = new LigaImporter2();
 		Collection<Match> matches = new ArrayList<Match>();
 		matches.addAll(li
 				.fetchMatchesFromTeamOverviewSite("http://kickern-hamburg.de/liga-tool/mannschaften"));

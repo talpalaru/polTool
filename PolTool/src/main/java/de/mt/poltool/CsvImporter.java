@@ -14,7 +14,7 @@ import au.com.bytecode.opencsv.CSVReader;
 import de.mt.poltool.gui.model.MatchSet;
 
 public class CsvImporter {
-	//
+
 	public Collection<MatchSet> read(File file) {
 		Collection<MatchSet> matches = new TreeSet<MatchSet>();
 		if (file != null) {
