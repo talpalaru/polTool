@@ -29,7 +29,7 @@ public class TeamGraphModel extends GraphModel {
 
 		double tickSize = 100 / (matches.size() / 16d);
 		for (MatchSet set : matches) {
-			if (set.getHomeResult() > set.getGuestResult()) {
+			if (set.getHomeResult() == set.getGuestResult()) {
 				increaseBy(draws, set.getSetNr(), tickSize);
 				increaseBy(mixed, set.getSetNr(), 0.5d * tickSize);
 			} else {
