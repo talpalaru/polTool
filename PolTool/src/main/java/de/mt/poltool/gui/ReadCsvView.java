@@ -68,8 +68,4 @@ public class ReadCsvView extends AbstractView {
 		setStatus("Datei eingelesen.");
 	}
 
-	private void setStatus(String status) {
-		PolApplication.setStatus(status);
-	}
-
 }

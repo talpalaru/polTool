@@ -38,10 +38,10 @@ public class PlayerGraphModel extends GraphModel {
 				increaseBy(draws, set.getSetNr(), 1d);
 				increaseBy(mixed, set.getSetNr(), 0.5d);
 			} else {
-				boolean ishHome = playerName.equals(set.getHomePlayer1())
+				boolean isHome = playerName.equals(set.getHomePlayer1())
 						|| playerName.equals(set.getHomePlayer2());
-				boolean homeWin = set.getHomeResult() == set.getGuestResult();
-				if (ishHome == homeWin) {
+				boolean homeWin = set.getHomeResult() > set.getGuestResult();
+				if (isHome == homeWin) {
 					increaseBy(wins, set.getSetNr(), 1d);
 					increaseBy(mixed, set.getSetNr(), 1d);
 				}

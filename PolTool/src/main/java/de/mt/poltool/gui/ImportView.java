@@ -11,6 +11,7 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import de.mt.poltool.LigaImporterTask;
+import de.mt.poltool.PolApplication;
 import de.mt.poltool.LigaImporterTask.Type;
 import de.mt.poltool.model.GuiModel;
 import de.mt.poltool.model.MatchSet;
@@ -62,6 +63,7 @@ public class ImportView extends AbstractView {
 			task.setOnSucceeded((value) -> {
 				model.addMatchSets((Collection<MatchSet>) value.getSource()
 						.getValue());
+				setStatus("Import Abgeschlossen");
 			});
 			Executors.newSingleThreadExecutor().execute(task);
 		});
@@ -74,5 +76,4 @@ public class ImportView extends AbstractView {
 		rootPane.addRow(6, startButton);
 		this.getChildren().add(rootPane);
 	}
-
 }

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.GridPane?>
+<?import de.mt.poltool.gui.EloTable?>
+
+<GridPane xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.mt.poltool.gui.EloController">
+   <children>
+      <SplitPane dividerPositions="0.25" orientation="VERTICAL">
+        <items>
+          <AnchorPane minHeight="20.0"/>
+          <AnchorPane minHeight="20.0">
+               <children>
+                  <EloTable/>
+               </children>
+            </AnchorPane>
+        </items>
+      </SplitPane>
+   </children>
+   <columnConstraints>
+      <ColumnConstraints />
+   </columnConstraints>
+   <rowConstraints>
+      <RowConstraints />
+   </rowConstraints>
+</GridPane>

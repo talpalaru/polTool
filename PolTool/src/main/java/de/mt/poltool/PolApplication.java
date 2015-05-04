@@ -1,11 +1,12 @@
 /**
  * 
  */
-package de.mt.poltool.gui;
+package de.mt.poltool;
 
 import javafx.application.Application;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.ReadOnlyStringProperty;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
@@ -13,7 +14,12 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
 import org.controlsfx.control.StatusBar;
+import org.controlsfx.dialog.ExceptionDialog;
 
+import de.mt.poltool.gui.EloView;
+import de.mt.poltool.gui.ImportView;
+import de.mt.poltool.gui.ReadCsvView;
+import de.mt.poltool.gui.VisualizationView;
 import de.mt.poltool.model.GuiModel;
 
 /**
@@ -36,26 +42,32 @@ public class PolApplication extends Application {
 		rootPane.prefHeightProperty().bind(scene.heightProperty());
 		rootPane.prefWidthProperty().bind(scene.widthProperty());
 
-		Tab importTab = new Tab();
-		importTab.setText("Import Web");
-		importTab.setClosable(false);
-		importTab.setContent(new ImportView(model, primaryStage));
+		Tab importTab = createTab("Webimport", new ImportView(model,
+				primaryStage));
+		Tab readTab = createTab("Read CSV",
+				new ReadCsvView(model, primaryStage));
+		Tab visTab = createTab("Statistik", new VisualizationView(model,
+				primaryStage));
 
-		Tab readTab = new Tab();
-		readTab.setText("Read CSV");
-		readTab.setClosable(false);
-		readTab.setContent(new ReadCsvView(model, primaryStage));
+		// GridPane eloView = (GridPane) FXMLLoader.load(getClass().getResource(
+		// "gui/EloView.fxml"));
+		// Tab eloTab = createTab("Elo", eloView);
+		Tab eloTab = createTab("Elo", new EloView(model, primaryStage));
 
-		Tab visTab = new Tab();
-		visTab.setText("Visualization");
-		visTab.setClosable(false);
-		visTab.setContent(new VisualizationView(model, primaryStage));
-
-		mainTabPane.getTabs().addAll(importTab, readTab, visTab);
+		mainTabPane.getTabs().addAll(importTab, readTab, visTab, eloTab);
 
 		rootPane.setCenter(mainTabPane);
 		rootPane.setBottom(statusBar);
 		primaryStage.show();
+	}
+
+	private Tab createTab(String name, Node content) {
+		new Tab();
+		Tab tab = new Tab();
+		tab.setText(name);
+		tab.setClosable(false);
+		tab.setContent(content);
+		return tab;
 	}
 
 	public static void main(String[] args) {
@@ -66,11 +78,9 @@ public class PolApplication extends Application {
 	}
 
 	private static void handleException(Throwable exception) {
-		setStatus(exception.getMessage());
-	}
+		ExceptionDialog ed = new ExceptionDialog(exception);
+		ed.show();
 
-	public static void setStatus(String status) {
-		// statusBar.setText(status);
 	}
 
 	public static void bindProgressBar(ReadOnlyDoubleProperty progressProperty) {

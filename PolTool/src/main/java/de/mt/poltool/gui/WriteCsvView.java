@@ -61,8 +61,4 @@ public class WriteCsvView extends AbstractView {
 		setStatus("Datei geschrieben.");
 	}
 
-	private void setStatus(String status) {
-		PolApplication.setStatus(status);
-	}
-
 }

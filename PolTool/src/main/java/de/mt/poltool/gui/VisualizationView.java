@@ -1,23 +1,19 @@
 package de.mt.poltool.gui;
 
 import java.io.File;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 
 import javafx.collections.transformation.FilteredList;
-import javafx.collections.transformation.SortedList;
+import javafx.geometry.Insets;
+import javafx.geometry.Orientation;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.SplitPane;
 import javafx.scene.control.ToolBar;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -38,7 +34,6 @@ import de.mt.poltool.visualisation.model.TeamGraphModel;
 import de.mt.poltool.visualisation.model.TeampPlayerGraphModel;
 
 public class VisualizationView extends AbstractView {
-	private FilteredList<MatchSet> setList;
 	private DatePicker fromDate;
 	private DatePicker toDate;
 	private ComboBox<String> teamFilter;
@@ -50,12 +45,19 @@ public class VisualizationView extends AbstractView {
 	private Button showTeamPlayerButton;
 	private Button showTeamButton;
 	private Button showPlayerPosButton;
+	private MatchSetTable setTable;
 
 	public VisualizationView(GuiModel model, Stage primaryStage) {
 		super(model, primaryStage);
-		rootPane.addRow(2, createTable());
-		rootPane.addRow(1, createFilterTab());
-		this.getChildren().add(rootPane);
+		setTable = new MatchSetTable(primaryStage, model);
+		SplitPane split = new SplitPane(createFilterTab(), setTable);
+		split.setOrientation(Orientation.VERTICAL);
+		split.setDividerPositions(0.3d);
+		split.prefHeightProperty().bind(
+				primaryStage.getScene().heightProperty());
+		split.prefWidthProperty().bind(primaryStage.getScene().widthProperty());
+		split.setPadding(new Insets(10d));
+		this.getChildren().add(split);
 	}
 
 	private Node createFilterTab() {
@@ -64,18 +66,18 @@ public class VisualizationView extends AbstractView {
 		pane.setVgap(10d);
 
 		fromDate = new DatePicker();
-		fromDate.valueProperty().addListener(value -> filterTable());
+		fromDate.valueProperty().addListener(value -> update());
 		toDate = new DatePicker();
-		toDate.valueProperty().addListener(value -> filterTable());
+		toDate.valueProperty().addListener(value -> update());
 
 		teamFilter = new ComboBox<String>(model.getTeams());
 		teamFilter.valueProperty().addListener(value -> {
-			filterTable();
+			update();
 			filterPlayers();
 		});
 		playerList = new FilteredList<String>(model.getPlayers(), value -> true);
 		playerFilter = new ComboBox<String>(playerList);
-		playerFilter.valueProperty().addListener(value -> filterTable());
+		playerFilter.valueProperty().addListener(value -> update());
 
 		Button writeButton = new Button("CSV Schreiben");
 		writeButton.setOnAction(event -> handleWrite());
@@ -90,7 +92,7 @@ public class VisualizationView extends AbstractView {
 		pane.add(createStatsButtonBar(), 0, 3, 4, 1);
 		pane.addRow(4, fileBar);
 
-		createStatisics();
+		updateStatisics();
 		return pane;
 	}
 
@@ -110,28 +112,29 @@ public class VisualizationView extends AbstractView {
 		showTeamButton = new Button("Team");
 		showTeamButton.setDisable(true);
 		showTeamButton.setOnAction(value -> new GraphView(new TeamGraphModel(
-				teamFilter.getValue(), setList, fromDate.getValue(), toDate
-						.getValue(), weightedCheckbox.isSelected()),
-				primaryStage));
+				teamFilter.getValue(), setTable.getItems(),
+				fromDate.getValue(), toDate.getValue(), weightedCheckbox
+						.isSelected()), primaryStage));
 
 		showTeamPlayerButton = new Button("Teamspieler");
 		showTeamPlayerButton.setDisable(true);
 		showTeamPlayerButton.setOnAction(value -> new GraphView(
-				new TeampPlayerGraphModel(setList, teamFilter.getValue(),
-						fromDate.getValue(), toDate.getValue(),
+				new TeampPlayerGraphModel(setTable.getItems(), teamFilter
+						.getValue(), fromDate.getValue(), toDate.getValue(),
 						weightedCheckbox.isSelected()), primaryStage));
 		statisics = new Text();
 		showPlayerButton = new Button("Einzelspieler");
 		showPlayerButton.setDisable(true);
 		showPlayerButton.setOnAction(value -> new GraphView(
-				new PlayerGraphModel(setList, playerFilter.getValue(), fromDate
-						.getValue(), toDate.getValue(), weightedCheckbox
-						.isSelected()), primaryStage));
+				new PlayerGraphModel(setTable.getItems(), playerFilter
+						.getValue(), fromDate.getValue(), toDate.getValue(),
+						weightedCheckbox.isSelected()), primaryStage));
 		showPlayerPosButton = new Button("Spielerpositionen");
 		showPlayerPosButton.setDisable(true);
 		showPlayerPosButton.setOnAction(value -> new GraphView(
-				new PlayerPosGraphModel(setList, playerFilter.getValue(),
-						fromDate.getValue(), toDate.getValue()), primaryStage));
+				new PlayerPosGraphModel(setTable.getItems(), playerFilter
+						.getValue(), fromDate.getValue(), toDate.getValue()),
+				primaryStage));
 
 		ToolBar bar = new ToolBar(new Label("Statisiken:  "), statisics,
 				showTeamButton, showTeamPlayerButton, showPlayerButton,
@@ -141,91 +144,9 @@ public class VisualizationView extends AbstractView {
 		return bar;
 	}
 
-	private TableView<MatchSet> createTable() {
-
-		TableView<MatchSet> table = new TableView<MatchSet>();
-		table.prefHeightProperty().bind(
-				primaryStage.getScene().heightProperty());
-		table.prefWidthProperty().bind(primaryStage.getScene().widthProperty());
-		TableColumn<MatchSet, LocalDateTime> date = createColumn("Spieldatum",
-				"date", LocalDateTime.class, 100d);
-		date.setCellFactory(column -> {
-			return new TableCell<MatchSet, LocalDateTime>() {
-
-				@Override
-				protected void updateItem(LocalDateTime item, boolean empty) {
-					super.updateItem(item, empty);
-					if (item == null || empty) {
-						setText(null);
-						setStyle("");
-					} else {
-						setText(item.format(DateTimeFormatter
-								.ofPattern("dd.MM.yyyy HH:mm")));
-					}
-				}
-
-			};
-		});
-		TableColumn<MatchSet, String> homeTeam = createColumn("HeimTeam",
-				"homeTeam", String.class, 120d);
-		TableColumn<MatchSet, String> guestTeam = createColumn("Gäste",
-				"guestTeam", String.class, 120d);
-		TableColumn<MatchSet, Integer> setNr = createColumn("Satz", "setNr",
-				Integer.class, 45d);
-		TableColumn<MatchSet, String> homePlayer1 = createColumn(
-				"Heimspieler 1", "homePlayer1", String.class, 140d);
-		TableColumn<MatchSet, String> homePlayer2 = createColumn(
-				"Heimspieler 2", "homePlayer2", String.class, 140d);
-		TableColumn<MatchSet, String> guestPlayer1 = createColumn(
-				"Gastspieler 1", "guestPlayer1", String.class, 140d);
-		TableColumn<MatchSet, String> guestPlayer2 = createColumn(
-				"Gastspieler 2", "guestPlayer2", String.class, 140d);
-		TableColumn<MatchSet, Integer> homeResult = createColumn("Punkte Heim",
-				"homeResult", Integer.class, 70d);
-		TableColumn<MatchSet, Integer> guestResult = createColumn(
-				"Punkte Gast", "guestResult", Integer.class, 70d);
-
-		table.getColumns().addAll(date, homeTeam, guestTeam, setNr,
-				homePlayer1, homePlayer2, guestPlayer1, guestPlayer2,
-				homeResult, guestResult);
-
-		setList = new FilteredList<MatchSet>(model.getSets(), set -> true);
-		SortedList<MatchSet> sortedSets = new SortedList<MatchSet>(setList);
-		sortedSets.comparatorProperty().bind(table.comparatorProperty());
-		table.setItems(sortedSets);
-		return table;
-	}
-
-	private <T> TableColumn<MatchSet, T> createColumn(String name,
-			String propertyName, Class<T> type, double width) {
-		TableColumn<MatchSet, T> column = new TableColumn<MatchSet, T>(name);
-		column.setCellValueFactory(new PropertyValueFactory<MatchSet, T>(
-				propertyName));
-		column.setPrefWidth(width);
-		return column;
-	}
-
-	private void filterTable() {
-		setList.setPredicate(set -> {
-			if (fromDate.getValue() != null
-					&& set.getDate().isBefore(
-							fromDate.getValue().atStartOfDay())) {
-				return false;
-			}
-			if (toDate.getValue() != null
-					&& set.getDate().isAfter(toDate.getValue().atStartOfDay())) {
-				return false;
-			}
-			if (!Strings.isNullOrEmpty(teamFilter.getValue())
-					&& !set.getTeams().contains(teamFilter.getValue())) {
-				return false;
-			}
-			if (!Strings.isNullOrEmpty(playerFilter.getValue())
-					&& !set.getPlayers().contains(playerFilter.getValue())) {
-				return false;
-			}
-			return true;
-		});
+	private void update() {
+		setTable.updateFilter(fromDate.getValue(), toDate.getValue(),
+				teamFilter.getValue(), playerFilter.getValue());
 
 		showTeamButton.setDisable(Strings.isNullOrEmpty(teamFilter.getValue()));
 		showTeamPlayerButton.setDisable(Strings.isNullOrEmpty(teamFilter
@@ -234,22 +155,22 @@ public class VisualizationView extends AbstractView {
 				.getValue()));
 		showPlayerPosButton.setDisable(Strings.isNullOrEmpty(playerFilter
 				.getValue()));
-		createStatisics();
+		updateStatisics();
 	}
 
-	private void createStatisics() {
-		int noSets = setList.size();
+	private void updateStatisics() {
+		int noSets = setTable.getItems().size();
 		int result = 0;
 		if (!Strings.isNullOrEmpty(teamFilter.getValue())) {
 			String team = teamFilter.getValue();
-			for (MatchSet set : setList) {
+			for (MatchSet set : setTable.getItems()) {
 				int delta = (set.getHomeResult() - set.getGuestResult())
 						* (team.equals(set.getHomeTeam()) ? 1 : -1);
 				result = result + delta;
 			}
 		} else if (!Strings.isNullOrEmpty(playerFilter.getValue())) {
 			String player = playerFilter.getValue();
-			for (MatchSet set : setList) {
+			for (MatchSet set : setTable.getItems()) {
 				int delta = (set.getHomeResult() - set.getGuestResult())
 						* (player.equals(set.getHomePlayer1())
 								|| player.equals(set.getHomePlayer2()) ? 1 : -1);
@@ -269,9 +190,8 @@ public class VisualizationView extends AbstractView {
 		File selectedFile = fileChooser.showSaveDialog(primaryStage);
 		if (selectedFile != null) {
 			CsvHandler handler = new CsvHandler();
-			handler.write(selectedFile, setList);
-			PolApplication.setStatus("Datei " + selectedFile.getName()
-					+ " geschrieben.");
+			handler.write(selectedFile, setTable.getItems());
+			setStatus("Datei " + selectedFile.getName() + " geschrieben.");
 		}
 	}
 }
