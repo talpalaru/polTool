@@ -76,6 +76,8 @@ public abstract class GraphModel {
 
 	protected void increaseBy(Map<Integer, Double> values, int setNr,
 			double addend) {
+		if (setNr > 16)
+			return;
 		Double value = values.get(setNr - 1);
 		if (value == null) {
 			value = 0d;
