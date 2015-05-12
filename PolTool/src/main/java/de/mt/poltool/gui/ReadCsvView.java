@@ -6,6 +6,7 @@ import java.util.Collection;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.Region;
 import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
@@ -18,9 +19,11 @@ public class ReadCsvView extends AbstractView {
 	private File file;
 	private TextField fileName;
 	private CheckBox appendCheckbox;
+	private Stage primaryStage;
 
-	public ReadCsvView(GuiModel model, Stage primaryStage) {
-		super(model, primaryStage);
+	public ReadCsvView(GuiModel model, Region parent, Stage primaryStage) {
+		super(model, parent);
+		this.primaryStage = primaryStage;
 
 		appendCheckbox = new CheckBox("Vorhandene Daten löschen");
 

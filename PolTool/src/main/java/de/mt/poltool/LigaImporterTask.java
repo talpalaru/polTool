@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javafx.concurrent.Task;
 
@@ -26,6 +28,12 @@ public class LigaImporterTask extends Task<Collection<MatchSet>> {
 
 	private String url;
 	private Type type;
+	private Pattern PATTERN_LEAGE = Pattern
+			.compile(".*in Wettbewerb (\\d)\\. Liga.*Gruppe (\\p{Upper}).*");
+	private Pattern PATTERN_LEAGE_WO_GROUP = Pattern
+			.compile(".*in Wettbewerb (\\d)\\. Liga.*");
+	private Pattern PATTERN_POKAL = Pattern
+			.compile(".*in Wettbewerb (Ligapokal).*");
 
 	public Collection<MatchSet> fetchMatchesFromTeamOverviewSite(
 			String sourceUrl) {
@@ -105,6 +113,7 @@ public class LigaImporterTask extends Task<Collection<MatchSet>> {
 		try {
 			doc = getDocument(sourceUrl);
 
+			// extract team information
 			Elements tableHeader = doc.select("body .sectiontableheader");
 			String homeTeam = "";
 			String guestTeam = "";
@@ -117,21 +126,49 @@ public class LigaImporterTask extends Task<Collection<MatchSet>> {
 					guestTeam = teams[1].trim();
 				}
 			}
-			Elements dateElements = doc
+
+			// extract date information
+			Elements elements = doc
 					.getElementsMatchingOwnText(".(Spieltag|Runde).*");
 			LocalDateTime date = null;
-			if (!dateElements.isEmpty()) {
-				String dateText = dateElements.get(0).text();
+			if (!elements.isEmpty()) {
+				String dateText = elements.get(0).text();
 				if (!Strings.isNullOrEmpty(dateText)) {
 					date = LocalDateTime.parse(dateText.split(",")[1].trim(),
 							DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"));
 				}
 			}
+
+			// extract leage information
+			elements = doc.getElementsMatchingOwnText(PATTERN_LEAGE_WO_GROUP);
+			String leage = null;
+			if (!elements.isEmpty()) {
+				Matcher matcher = PATTERN_LEAGE.matcher(elements.get(0).text());
+				if (matcher.matches() && matcher.groupCount() > 1) {
+					leage = matcher.group(1) + matcher.group(2);
+				} else {
+					matcher = PATTERN_LEAGE_WO_GROUP.matcher(elements.get(0)
+							.text());
+					if (matcher.matches() && matcher.groupCount() > 0) {
+						leage = matcher.group(1);
+					} else {
+						matcher = PATTERN_POKAL.matcher(elements.get(0).text());
+						if (matcher.matches() && matcher.groupCount() > 0) {
+							leage = matcher.group(1);
+						}
+					}
+				}
+			}
+
+			// extract the sets
 			matches.addAll(parseRows(doc));
+
+			// enrich the sets by the general information
 			for (MatchSet matchSet : matches) {
 				matchSet.setHomeTeam(homeTeam);
 				matchSet.setGuestTeam(guestTeam);
 				matchSet.setDate(date);
+				matchSet.setLeage(leage);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

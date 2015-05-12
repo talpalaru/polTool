@@ -17,10 +17,13 @@ import javafx.scene.control.ToolBar;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
+
+import org.controlsfx.control.CheckComboBox;
 
 import com.google.common.base.Strings;
 
@@ -38,6 +41,7 @@ public class VisualizationView extends AbstractView {
 	private DatePicker toDate;
 	private ComboBox<String> teamFilter;
 	private ComboBox<String> playerFilter;
+	private CheckComboBox<String> leageFilter;
 	private Text statisics;
 	private CheckBox weightedCheckbox;
 	private FilteredList<String> playerList;
@@ -46,16 +50,17 @@ public class VisualizationView extends AbstractView {
 	private Button showTeamButton;
 	private Button showPlayerPosButton;
 	private MatchSetTable setTable;
+	private Stage primaryStage;
 
-	public VisualizationView(GuiModel model, Stage primaryStage) {
-		super(model, primaryStage);
-		setTable = new MatchSetTable(primaryStage, model);
+	public VisualizationView(GuiModel model, Region parent, Stage primaryStage) {
+		super(model, parent);
+		this.primaryStage = primaryStage;
+		setTable = new MatchSetTable(model);
 		SplitPane split = new SplitPane(createFilterTab(), setTable);
 		split.setOrientation(Orientation.VERTICAL);
 		split.setDividerPositions(0.3d);
-		split.prefHeightProperty().bind(
-				primaryStage.getScene().heightProperty());
-		split.prefWidthProperty().bind(primaryStage.getScene().widthProperty());
+		split.prefHeightProperty().bind(parent.heightProperty());
+		split.prefWidthProperty().bind(parent.widthProperty());
 		split.setPadding(new Insets(10d));
 		this.getChildren().add(split);
 	}
@@ -70,15 +75,22 @@ public class VisualizationView extends AbstractView {
 		toDate = new DatePicker();
 		toDate.valueProperty().addListener(value -> update());
 
-		teamFilter = new ComboBox<String>(model.getTeams());
+		teamFilter = new ComboBox<String>(model.getTeamModel().getTeams());
 		teamFilter.valueProperty().addListener(value -> {
 			update();
 			filterPlayers();
 		});
-		playerList = new FilteredList<String>(model.getPlayers(), value -> true);
+		playerList = new FilteredList<String>(model.getPlayerModel()
+				.getPlayers(), value -> true);
 		playerFilter = new ComboBox<String>(playerList);
 		playerFilter.valueProperty().addListener(value -> update());
 
+		leageFilter = new CheckComboBox<String>(model.getLeages());
+		leageFilter
+				.getCheckModel()
+				.getCheckedItems()
+				.addListener(
+						(javafx.collections.ListChangeListener.Change<? extends String> c) -> update());
 		Button writeButton = new Button("CSV Schreiben");
 		writeButton.setOnAction(event -> handleWrite());
 
@@ -86,11 +98,12 @@ public class VisualizationView extends AbstractView {
 		fileBar.setBackground(Background.EMPTY);
 
 		pane.addRow(0, new HBox());
-		pane.addRow(1, new Label("Ab:"), fromDate, new Label("Bis: "), toDate);
+		pane.addRow(1, new Label("Ab"), fromDate, new Label("Bis"), toDate);
 		pane.addRow(2, new Label("Team"), teamFilter, new Label("Spieler"),
 				playerFilter);
-		pane.add(createStatsButtonBar(), 0, 3, 4, 1);
-		pane.addRow(4, fileBar);
+		pane.addRow(3, new Label("Liga"), leageFilter);
+		pane.add(createStatsButtonBar(), 0, 4, 4, 1);
+		pane.add(fileBar, 0, 5, 2, 1);
 
 		updateStatisics();
 		return pane;
@@ -101,7 +114,8 @@ public class VisualizationView extends AbstractView {
 		if (Strings.isNullOrEmpty(team)) {
 			playerList.setPredicate(value -> true);
 		} else {
-			Collection<String> playersByTeam = model.getPlayersByTeam(team);
+			Collection<String> playersByTeam = model.getTeamModel()
+					.getPlayersByTeam(team);
 			playerList.setPredicate(value -> value == null ? false
 					: playersByTeam.contains(value));
 		}
@@ -146,7 +160,8 @@ public class VisualizationView extends AbstractView {
 
 	private void update() {
 		setTable.updateFilter(fromDate.getValue(), toDate.getValue(),
-				teamFilter.getValue(), playerFilter.getValue());
+				teamFilter.getValue(), playerFilter.getValue(), leageFilter
+						.getCheckModel().getCheckedItems());
 
 		showTeamButton.setDisable(Strings.isNullOrEmpty(teamFilter.getValue()));
 		showTeamPlayerButton.setDisable(Strings.isNullOrEmpty(teamFilter

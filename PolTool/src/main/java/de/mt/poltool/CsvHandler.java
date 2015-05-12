@@ -39,6 +39,9 @@ public class CsvHandler {
 						set.setGuestPlayer2(line[7]);
 						set.setHomeResult(Integer.parseInt(line[8]));
 						set.setGuestResult(Integer.parseInt(line[9]));
+						if (line.length > 9) {
+							set.setLeage(line[10]);
+						}
 						matches.add(set);
 					}
 				}
@@ -69,7 +72,7 @@ public class CsvHandler {
 			csvWriter.writeNext(new String[] {//
 					"date", " homeTeam", " guestTeam", " setNr", " homeP1",
 							" homeP2", "guestP1", " guestP2", " homeResult",
-							" guestResult" });
+							" guestResult", "leage" });
 			for (MatchSet set : matches) {
 				String homeTeam = set.getHomeTeam();
 				String guestTeam = set.getGuestTeam();
@@ -82,10 +85,12 @@ public class CsvHandler {
 				String guestP2 = set.getGuestPlayer2();
 				String homeResult = Integer.toString(set.getHomeResult());
 				String guestResult = Integer.toString(set.getGuestResult());
+				String leage = set.getLeage();
 
 				csvWriter.writeNext(new String[] {//
 						date, homeTeam, guestTeam, setNr, homeP1, homeP2,
-								guestP1, guestP2, homeResult, guestResult });
+								guestP1, guestP2, homeResult, guestResult,
+								leage });
 			}
 
 		} catch (IOException e) {

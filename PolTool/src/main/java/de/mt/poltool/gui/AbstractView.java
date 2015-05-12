@@ -8,26 +8,24 @@ import javafx.geometry.Insets;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.layout.GridPane;
-import javafx.stage.Stage;
+import javafx.scene.layout.Region;
 import de.mt.poltool.PolApplication;
 import de.mt.poltool.model.GuiModel;
 
 public class AbstractView extends Group {
 
 	protected GuiModel model;
-	protected Stage primaryStage;
+	protected Region parent;
 	protected GridPane rootPane;
 	protected StringProperty statusProperty;
 
-	public AbstractView(GuiModel model, Stage primaryStage) {
+	public AbstractView(GuiModel model, Region parent) {
 		super();
 		this.model = model;
-		this.primaryStage = primaryStage;
+		this.parent = parent;
 		rootPane = new GridPane();
-		rootPane.prefHeightProperty().bind(
-				primaryStage.getScene().heightProperty());
-		rootPane.prefWidthProperty().bind(
-				primaryStage.getScene().widthProperty());
+		rootPane.prefHeightProperty().bind(parent.heightProperty());
+		rootPane.prefWidthProperty().bind(parent.widthProperty());
 		rootPane.setHgap(10d);
 		rootPane.setVgap(10d);
 		rootPane.setPadding(new Insets(10d));

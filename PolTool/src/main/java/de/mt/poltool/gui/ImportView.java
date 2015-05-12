@@ -8,18 +8,18 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.layout.Region;
 import javafx.scene.text.Font;
-import javafx.stage.Stage;
 import de.mt.poltool.LigaImporterTask;
-import de.mt.poltool.PolApplication;
 import de.mt.poltool.LigaImporterTask.Type;
+import de.mt.poltool.PolApplication;
 import de.mt.poltool.model.GuiModel;
 import de.mt.poltool.model.MatchSet;
 
 public class ImportView extends AbstractView {
 
-	public ImportView(GuiModel model, Stage primaryStage) {
-		super(model, primaryStage);
+	public ImportView(GuiModel model, Region parent) {
+		super(model, parent);
 
 		TextField urlName = new TextField();
 		urlName.setEditable(true);

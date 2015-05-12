@@ -43,16 +43,16 @@ public class PolApplication extends Application {
 		rootPane.prefWidthProperty().bind(scene.widthProperty());
 
 		Tab importTab = createTab("Webimport", new ImportView(model,
+				mainTabPane));
+		Tab readTab = createTab("Read CSV", new ReadCsvView(model, mainTabPane,
 				primaryStage));
-		Tab readTab = createTab("Read CSV",
-				new ReadCsvView(model, primaryStage));
 		Tab visTab = createTab("Statistik", new VisualizationView(model,
-				primaryStage));
+				mainTabPane, primaryStage));
 
 		// GridPane eloView = (GridPane) FXMLLoader.load(getClass().getResource(
 		// "gui/EloView.fxml"));
 		// Tab eloTab = createTab("Elo", eloView);
-		Tab eloTab = createTab("Elo", new EloView(model, primaryStage));
+		Tab eloTab = createTab("Elo", new EloView(model, mainTabPane));
 
 		mainTabPane.getTabs().addAll(importTab, readTab, visTab, eloTab);
 

@@ -4,11 +4,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
-import javafx.stage.Stage;
 
 import com.google.common.base.Strings;
 
@@ -17,8 +17,8 @@ import de.mt.poltool.model.MatchSet;
 
 public class MatchSetTable extends AbstractTable<MatchSet> {
 
-	public MatchSetTable(Stage primaryStage, GuiModel model) {
-		super(primaryStage, model);
+	public MatchSetTable(GuiModel model) {
+		super(model);
 	}
 
 	private FilteredList<MatchSet> setList;
@@ -34,6 +34,16 @@ public class MatchSetTable extends AbstractTable<MatchSet> {
 	protected void createTable() {
 		TableColumn<MatchSet, LocalDateTime> date = createColumn("Spieldatum",
 				"date", LocalDateTime.class, 100d);
+		createColumn("HeimTeam", "homeTeam", String.class, 120d);
+		createColumn("Gäste", "guestTeam", String.class, 120d);
+		createColumn("Satz", "setNr", Integer.class, 45d);
+		createColumn("Heimspieler 1", "homePlayer1", String.class, 140d);
+		createColumn("Heimspieler 2", "homePlayer2", String.class, 140d);
+		createColumn("Gastspieler 1", "guestPlayer1", String.class, 140d);
+		createColumn("Gastspieler 2", "guestPlayer2", String.class, 140d);
+		createColumn("Punkte Heim", "homeResult", Integer.class, 70d);
+		createColumn("Punkte Gast", "guestResult", Integer.class, 70d);
+
 		date.setCellFactory(column -> {
 			return new TableCell<MatchSet, LocalDateTime>() {
 
@@ -51,28 +61,6 @@ public class MatchSetTable extends AbstractTable<MatchSet> {
 
 			};
 		});
-		TableColumn<MatchSet, String> homeTeam = createColumn("HeimTeam",
-				"homeTeam", String.class, 120d);
-		TableColumn<MatchSet, String> guestTeam = createColumn("Gäste",
-				"guestTeam", String.class, 120d);
-		TableColumn<MatchSet, Integer> setNr = createColumn("Satz", "setNr",
-				Integer.class, 45d);
-		TableColumn<MatchSet, String> homePlayer1 = createColumn(
-				"Heimspieler 1", "homePlayer1", String.class, 140d);
-		TableColumn<MatchSet, String> homePlayer2 = createColumn(
-				"Heimspieler 2", "homePlayer2", String.class, 140d);
-		TableColumn<MatchSet, String> guestPlayer1 = createColumn(
-				"Gastspieler 1", "guestPlayer1", String.class, 140d);
-		TableColumn<MatchSet, String> guestPlayer2 = createColumn(
-				"Gastspieler 2", "guestPlayer2", String.class, 140d);
-		TableColumn<MatchSet, Integer> homeResult = createColumn("Punkte Heim",
-				"homeResult", Integer.class, 70d);
-		TableColumn<MatchSet, Integer> guestResult = createColumn(
-				"Punkte Gast", "guestResult", Integer.class, 70d);
-
-		getColumns().addAll(date, homeTeam, guestTeam, setNr, homePlayer1,
-				homePlayer2, guestPlayer1, guestPlayer2, homeResult,
-				guestResult);
 
 		setList = new FilteredList<MatchSet>(model.getSets(), set -> true);
 		SortedList<MatchSet> sortedSets = new SortedList<MatchSet>(setList);
@@ -81,7 +69,7 @@ public class MatchSetTable extends AbstractTable<MatchSet> {
 	}
 
 	public void updateFilter(LocalDate fromDate, LocalDate toDate, String team,
-			String player) {
+			String player, ObservableList<String> leages) {
 		getSetList()
 				.setPredicate(
 						set -> {
@@ -101,6 +89,10 @@ public class MatchSetTable extends AbstractTable<MatchSet> {
 							}
 							if (!Strings.isNullOrEmpty(player)
 									&& !set.getPlayers().contains(player)) {
+								return false;
+							}
+							if (leages != null && !leages.isEmpty()
+									&& !leages.contains(set.getLeage())) {
 								return false;
 							}
 							return true;

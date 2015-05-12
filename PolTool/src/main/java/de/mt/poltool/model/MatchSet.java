@@ -17,6 +17,7 @@ public class MatchSet implements Comparable<MatchSet> {
 	private String guestPlayer2;
 	private int homeResult;
 	private int guestResult;
+	private String leage;
 
 	public String getHomeTeam() {
 		return homeTeam;
@@ -157,5 +158,13 @@ public class MatchSet implements Comparable<MatchSet> {
 	public Collection<String> getPlayers() {
 		return Lists.<String> newArrayList(getHomePlayer1(), getHomePlayer2(),
 				getGuestPlayer1(), getGuestPlayer2());
+	}
+
+	public String getLeage() {
+		return leage;
+	}
+
+	public void setLeage(String leage) {
+		this.leage = leage;
 	}
 }
